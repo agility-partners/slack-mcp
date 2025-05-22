@@ -36,20 +36,29 @@ jobs:
       - name: Trigger Render Deploy
         id: render_deploy
         run: |
-          curl -X POST "https://api.render.com/deploy/srv-d0n7fq9r0fns738njna0?key=IrX_e2hnX4Y"
+          RESPONSE=$(curl -s -X POST "https://api.render.com/deploy/srv-d0n7fq9r0fns738njna0?key=IrX_e2hnX4Y")
+          echo "$RESPONSE"
+          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.id')
+          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
 
       # 6. Monitor Render deploy status
       - name: Monitor Render Deploy Status
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
+          DEPLOY_ID="${{ steps.render_deploy.outputs.deploy_id }}"
           SERVICE_ID="srv-d0n7fq9r0fns738njna0"
-          API_URL="https://api.render.com/v1/services/$SERVICE_ID/deploys"
+          API_URL="https://api.render.com/v1/services/$SERVICE_ID/deploys/$DEPLOY_ID"
           AUTH_HEADER="Authorization: Bearer $RENDER_API_KEY"
 
-          echo "Polling Render deploy status..."
+          if [ -z "$DEPLOY_ID" ] || [ "$DEPLOY_ID" == "null" ]; then
+            echo "Could not retrieve deploy ID. Exiting."
+            exit 1
+          fi
+
+          echo "Polling Render deploy status for deploy ID: $DEPLOY_ID"
           for i in {1..30}; do
-            STATUS=$(curl -s -H "$AUTH_HEADER" "$API_URL?limit=1" | jq -r '.[0].status')
+            STATUS=$(curl -s -H "$AUTH_HEADER" "$API_URL" | jq -r '.status')
             echo "Current status: $STATUS"
             if [[ "$STATUS" == "live" ]]; then
               echo "Deploy succeeded!"
