@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { slackClient } from "../../lib/slack";
 import { slackService } from "../../services/slack.service";
+import { prisma } from "../../lib/prisma";
 
 /**
  * Slack Message Send Tool
@@ -24,16 +25,38 @@ export const slackMessageSendTool = {
   }
 };
 
+
 /**
- * Slack Get Users Tool
- * GET /slack/users.list
+ * Slack Get User By Email Tool
+ * GET /slack/user.byEmail
  */
-export const slackGetUsersTool = {
-  name: "slack_get_users",
-  description: "Get a list of all Slack users.",
-  schema: {},
-  handler: async () => {
-    const users = await slackService.getAllUsers();
-    return { content: [{ type: "text" as const, text: JSON.stringify(users) }] };
+export const slackGetUserByEmailTool = {
+  name: "slack_get_user_by_email",
+  description: "Get a Slack user by their email address.",
+  schema: {
+    email: z.string({ description: "Email address of the user to look up." }),
+  },
+  handler: async ({ email }: { email: string }) => {
+    const normalizedEmail = email.toLowerCase();
+    const user = await prisma.userCache.findUnique({
+      where: { email: normalizedEmail }
+    });
+
+    if (!user) {
+      return { content: [{ type: "text" as const, text: JSON.stringify({ found: false, message: `No user found with email: ${normalizedEmail}` }) }] };
+    }
+
+    return {
+      content: [{
+        type: "text" as const,
+        text: JSON.stringify({
+          found: true,
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          slackId: user.slackId
+        })
+      }]
+    };
   }
 };
