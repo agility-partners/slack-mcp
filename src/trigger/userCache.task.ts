@@ -35,7 +35,12 @@ export const slackUserCacheTask = schedules.task({
           });
           savedUsers.push(savedUser);
         } catch (err) {
-          logger.error(`Failed to save user ${user.profile?.email}:`);
+          logger.error(
+            `Failed to save user ${user.profile?.email}: ${err instanceof Error ? err.message : String(err)}`
+          );
+          if (err instanceof Error && err.stack) {
+            logger.error(`Stack trace: ${err.stack}`);
+          }
         }
       }
       
@@ -45,7 +50,12 @@ export const slackUserCacheTask = schedules.task({
         usersProcessed: savedUsers.length
       };
     } catch (error) {
-      logger.error("Failed to cache Slack users:");
+      logger.error(
+        `Failed to cache Slack users: ${error instanceof Error ? error.message : String(error)}`
+      );
+      if (error instanceof Error && error.stack) {
+        logger.error(`Stack trace: ${error.stack}`);
+      }
       return {
         success: false,
         error: (error as Error).message
