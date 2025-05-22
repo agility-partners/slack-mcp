@@ -49,7 +49,7 @@ jobs:
 
           echo "Polling Render deploy status..."
           for i in {1..30}; do
-            STATUS=$(curl -s -H "$AUTH_HEADER" "$API_URL?limit=1" | jq -r '.deploys[0].status')
+            STATUS=$(curl -s -H "$AUTH_HEADER" "$API_URL?limit=1" | jq -r '.[0].status')
             echo "Current status: $STATUS"
             if [[ "$STATUS" == "live" ]]; then
               echo "Deploy succeeded!"
