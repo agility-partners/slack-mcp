@@ -38,7 +38,7 @@ jobs:
         run: |
           RESPONSE=$(curl -s -X POST "https://api.render.com/deploy/srv-d0n7fq9r0fns738njna0?key=IrX_e2hnX4Y")
           echo "$RESPONSE"
-          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.id')
+          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.deploy.id')
           echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
 
       # 6. Monitor Render deploy status
