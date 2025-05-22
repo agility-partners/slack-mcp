@@ -12,7 +12,6 @@
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
     "trigger": "npx trigger.dev@latest dev 2> /dev/null",
-    "trigger:deploy": "npx trigger.dev@latest deploy",
     "mcp": "npx @modelcontextprotocol/inspector",
     "db:generate": "npx prisma generate",
     "db:migrate:dev": "npx prisma migrate dev",

@@ -114,6 +114,4 @@ jobs:
       - name: 🚀 Deploy Trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SLACK_BOT_TOKEN: $ {{ secrets.SLACK_BOT_TOKEN }}
-        run: bun trigger:deploy
+        run: npx trigger.dev@latest deploy
