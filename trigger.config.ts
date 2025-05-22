@@ -1,4 +1,5 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
+import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
 
 export default defineConfig({
   project: "proj_dsbuprmdcrprkfpxtyvg",
@@ -19,4 +20,12 @@ export default defineConfig({
     },
   },
   dirs: ["./src/trigger"],
+  build: {
+    extensions: [
+      prismaExtension({
+        version: "5.19.0", // optional, automatically detected if not provided
+        schema: "prisma/schema.prisma",
+      }),
+    ],
+  },
 });
