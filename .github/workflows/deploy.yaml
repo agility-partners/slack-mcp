@@ -63,8 +63,8 @@ jobs:
             if [[ "$STATUS" == "live" ]]; then
               echo "Deploy succeeded!"
               exit 0
-            elif [[ "$STATUS" == "failed" ]]; then
-              echo "Deploy failed!"
+            elif [[ "$STATUS" == "failed" || "$STATUS" == "update_failed" ]]; then
+              echo "Deploy failed with status: $STATUS"
               exit 1
             fi
             sleep 10
