@@ -31,3 +31,34 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: bun db:migrate:deploy
+
+      # 5. Trigger Render deploy
+      - name: Trigger Render Deploy
+        id: render_deploy
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv-d0n7fq9r0fns738njna0?key=IrX_e2hnX4Y"
+
+      # 6. Monitor Render deploy status
+      - name: Monitor Render Deploy Status
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          SERVICE_ID="srv-d0n7fq9r0fns738njna0"
+          API_URL="https://api.render.com/v1/services/$SERVICE_ID/deploys"
+          AUTH_HEADER="Authorization: Bearer $RENDER_API_KEY"
+
+          echo "Polling Render deploy status..."
+          for i in {1..30}; do
+            STATUS=$(curl -s -H "$AUTH_HEADER" "$API_URL?limit=1" | jq -r '.deploys[0].status')
+            echo "Current status: $STATUS"
+            if [[ "$STATUS" == "live" ]]; then
+              echo "Deploy succeeded!"
+              exit 0
+            elif [[ "$STATUS" == "failed" ]]; then
+              echo "Deploy failed!"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for deploy to complete."
+          exit 1
