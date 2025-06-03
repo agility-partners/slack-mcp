@@ -19,6 +19,26 @@ export const SSERoute = new Elysia().get("/sse", async (context) => {
       const transport = new SSEElysiaTransport("/messages", context);
       console.log(`Transport created with sessionId: ${transport.sessionId}`);
 
+      transport.onmessage = async (msg) => {
+        try {
+          console.log(`[SSE] Processing message:`, msg);
+          const result = await server.handle(msg);
+          console.log(`[SSE] Tool execution result:`, result);
+          await transport.send({
+            jsonrpc: "2.0",
+            result,
+            id: msg.id
+          });
+        } catch (err) {
+          console.error(`[SSE] Tool execution error:`, err);
+          await transport.send({
+            jsonrpc: "2.0",
+            error: { code: -32000, message: "Internal error" },
+            id: msg.id
+          });
+        }
+      };
+
       // Store the transport
       console.log("Storing transport in map");
       transports.set(transport.sessionId, transport);
