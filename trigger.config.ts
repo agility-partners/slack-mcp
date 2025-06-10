@@ -20,5 +20,13 @@ export default defineConfig({
     },
   },
   dirs: ["./src/trigger"],
-  
+  build: {
+    extensions: [
+      prismaExtension({
+        version: "6.8.2",
+        schema: "prisma/schema.prisma",
+        clientGenerator: "client",
+      }),
+    ],
+  },
 });
